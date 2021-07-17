@@ -1,4 +1,9 @@
-# yobot
+# yobot 项目不再更新
+
+**由于新版公会战规则变化，yobot无法适配新版公会战规则，请在下面时间之前改用[HoshinoBot Clanbattle V4](https://ngabbs.com/read.php?tid=26540003)**  
+日服：2021年6月  
+台服：2021年11月  
+国服：2023年7月
 
 [yobot](./about.md) 是为[公主连接](https://priconne-redive.jp/)公会战设计的辅助机器人，能够帮助公会战管理者提供自动化管理服务。
 

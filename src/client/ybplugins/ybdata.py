@@ -1,10 +1,12 @@
+import time
+
 from peewee import *
 from playhouse.migrate import SqliteMigrator, migrate
 
 from .web_util import rand_string
 
 _db = SqliteDatabase(None)
-_version = 12  # 目前版本
+_version = 14  # 目前版本
 
 MAX_TRY_TIMES = 3
 
@@ -66,8 +68,7 @@ class Clan_group(_BaseModel):
     boss_cycle = SmallIntegerField(default=1)
     boss_num = SmallIntegerField(default=1)
     boss_health = BigIntegerField(default=6000000)
-    challenging_member_qq_id = TextField(null=True) # 改成字符串方便多人，也省的改数据库表格
-    lock_member_qq_id=IntegerField(null=True)# 锁定和申请出刀分开
+    challenging_member_qq_id = IntegerField(null=True)
     boss_lock_type = IntegerField(default=0)  # 1出刀中，2其他
     challenging_start_time = BigIntegerField(default=0)
     challenging_comment = TextField(null=True)
@@ -114,6 +115,7 @@ class Clan_subscribe(_BaseModel):
     qqid = IntegerField()
     subscribe_item = SmallIntegerField()
     message = TextField(null=True)
+    created_time = TimestampField(default=time.time())
 
     class Meta:
         indexes = (
@@ -251,12 +253,23 @@ def db_upgrade(old_version):
             migrator.add_column('user', 'notify_preference',
                                 IntegerField(default=1)),
         )
-    if old_version < 12:
+    # if old_version < 12:
+    #     migrate(
+    #         migrator.alter_column_type('clan_group', 'challenging_member_qq_id',
+    #                                    TextField(null=True)),
+    #         migrator.add_column('clan_group', 'lock_member_qq_id',
+    #                             IntegerField(null=True)),
+    #     )
+    if old_version == 12:
+        # revert database version 12
         migrate(
             migrator.alter_column_type('clan_group', 'challenging_member_qq_id',
-                                       TextField(null=True)),
-            migrator.add_column('clan_group', 'lock_member_qq_id',
-                                IntegerField(null=True)),
+                                       IntegerField(null=True)),
+            migrator.drop_column('clan_group', 'lock_member_qq_id'),
         )
-
+    if old_version < 14:
+        migrate(
+            migrator.add_column('clan_subscribe', 'created_time',
+                                TimestampField(default=time.time()))
+        )
     DB_schema.replace(key='version', value=str(_version)).execute()
